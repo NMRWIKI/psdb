@@ -1,3 +1,94 @@
 This is the directory of open access pulse sequence library at NMR Wiki.
 
+Contents is a plain directory tree containing only the essential bits
+of the pulse sequences - i.e. everything needed to run the experiments,
+except the external documentation.
 
+What is PSDB?
+=============
+PSDB is an abbreviation for Pulse Sequence DataBase. You can freely
+clone and extend this repository. Please contact NMR Wiki administrator
+at admin@nmrwiki.org if you have further questions.
+
+Why store psdb files in a directory under revision control?
+===========================================================
+The chosen directory structure is simple, predictable and is familiar
+to most NMR spectrosopists, as you will recognize from the description
+below. Components, such as shaped pulse waveforms
+may be reused by multiple pulse sequences.
+
+Directory tree is easy to keep under a version control system, which 
+is essential to maintain integrity of a collection of interdependent
+resources (individual files - such as pulse sequences, parameter files,
+waveforms, etc.). Revision control has a concept of "commit" - an atomic
+change of multiple resources, which helps to guarantee that the collection
+of files is never in a "half-up-to-date" state and is always usable.
+
+Finally, revision control allows rolling back any unwanted changes,
+branching, as well as intelligent merges of the source code files.
+
+What this repository does not have?
+===================================
+This git repository does not have extended documentation,
+nor means to search the contents. These things are provided by the
+NMR Wiki website: http://nmrwiki.org/wiki/index.php?title=Special:PulseSequenceDatabase
+
+Even though that documentation is not included here, it is still
+freely available and copyable at the wiki site.
+
+Directory structure
+===================
+Directories located at the root bear name(s) of the laboratory Principal Investigator(s).
+Directory vendorlib is special - it is reserved to instrument vendors.
+
+Each of those directories is an independent collection of pulse sequences and
+accompanying resources.
+
+For example, directory morris_nilsson is reserved for the laboratories of 
+Drs. Morris and Nillson of Manchester University
+and has the following structure internally:
+
+morris_nillson/
+    bruker/   #<--- subtree for pulse sequences in Bruker format
+        au/
+        lists/
+            pp/ #<--with all the usual subdirectories
+        par/
+
+    vnmrsys/  #<--- subtree for pulse sequences in Varian format
+        data/
+        maclib/
+        parlib/
+        psglib/
+        shapelib/
+
+There are two subtrees - 'bruker' and 'vnmrsys' - for sequences in Bruker
+and Varian format - respectively. Please feel free to add directory 
+structures for other formats. The only requirement is that the structure
+must be exactly like on the standard setup on the spectrometers.
+
+Storage conventions
+===================
+Directory vnmrsys has one 'foreign' component called 'data' - it is
+added to store .tar archives with sample data. In 'bruker' those archives
+are to be placed in 'par' directory.
+
+Again, an important convention at the moment is that sample data is
+archived into .tar files - one per pulse sequence. 
+That is done to allow easy download
+of all things included into sample data sets at once.
+
+Currently there is a convention - Sample data archive for the pulse
+sequence must have name derived from the pulse sequence itself.
+
+For example data for pulse sequence Oneshot has to be in the file
+called Oneshot.tar and must either go into 'bruker/par' directory
+or 'vnmrsys/data'.
+
+This convention can change in the future.
+
+Further development of psdb
+===========================
+The method described above is 'a method' and further ajustments
+are quite possible. If you have suggestions - please email
+"admin@nmrwiki.org" or any of the database maintainers you know.
