@@ -30,7 +30,7 @@ branching, as well as intelligent merges of the source code files.
 What this repository does not have?
 ===================================
 This git repository does not have extended documentation,
-nor means to search the contents. These things are provided by the
+nor means to search the contents (not yet). These things are provided by the
 NMR Wiki website: http://nmrwiki.org/wiki/index.php?title=Special:PulseSequenceDatabase
 
 Even though that documentation is not included here, it is still
