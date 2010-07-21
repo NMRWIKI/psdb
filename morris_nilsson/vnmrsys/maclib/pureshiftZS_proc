@@ -1,0 +1,93 @@
+"pureshiftZS_proc :  assemble pure shift FID from modified Zangger-Sterk pulse sequence data"
+"GAM 16vii09; perform all processing within current experiment, keeping a copy of original data in subexp/pureshift"
+
+if (($#>0)) then
+	write('error','Usage: pureshiftZS_proc;  takes no arguments')
+	abort
+endif
+
+jexp:$exp,$expname
+
+cptmp('pureshift')
+$nfid=ni
+exists('nchunk','parameter'):$ex
+IF $ex>0 then		"backward compatibility"
+	sw1=sw*2/nchunk
+	groupcopy('current','processed','acquisition')
+ENDIF
+
+$npoint=trunc((sw/sw1)+0.5)
+$tmpfile=userdir+'/'+$expname+'/homodec_writefid'
+$tmpfile2=userdir+'/'+$expname+'/homodec_fid'
+beepoff
+
+$imag=0.0
+$real=0.0
+
+exists($tmpfile,'file'):$ex1				
+IF $ex1>0 then 						
+    shell('rm',$tmpfile)	
+ENDIF			
+
+$i=1
+REPEAT
+	writefid($tmpfile,$i)
+	lookup('file',$tmpfile)
+	lookup('read'):$temp   "read dummy points"
+	lookup('read'):$temp   "read dummy points"
+
+	$j=1
+	IF $i<2 THEN
+		REPEAT
+			lookup('read'):$imag[($i-1)*$npoint+$j]
+			lookup('read'):$real[($i-1)*$npoint+$j]
+			$j=$j+1
+		UNTIL ($j>($npoint/2.0))
+	ELSE
+		REPEAT
+			lookup('read'):$imag[($i-1)*$npoint+$j-$npoint/2]
+			lookup('read'):$real[($i-1)*$npoint+$j-$npoint/2]
+			$j=$j+1
+		UNTIL ($j>($npoint))
+	ENDIF
+	exists($tmpfile,'file'):$ex1				
+	IF $ex1>0 then 						
+	    shell('rm',$tmpfile)	
+	ENDIF			
+	$i=$i+1
+UNTIL ($i>$nfid)
+
+exists($tmpfile2,'file'):$ex1				
+IF $ex1>0 then 						
+    shell('rm',$tmpfile2)	
+ENDIF			
+
+$i=1
+REPEAT 
+	write('file',$tmpfile2,'%d %d',$imag[$i],$real[$i])
+	$i=$i+1
+UNTIL ($i>($nfid*$npoint-$npoint/2))
+
+rm(curexp+'/acqfil/fid')
+setvalue('np',($npoint*$nfid-$npoint/2))
+setvalue('fn',np)
+groupcopy('current','processed','acquisition')
+at=np/sw
+groupcopy('current','processed','acquisition')
+shell('sleep 1')
+
+makefid($tmpfile2)
+
+exists($tmpfile2,'file'):$ex1				
+IF $ex1>0 then 						
+  shell('rm',$tmpfile2)	
+ENDIF			
+exists('nchunk','parameter'):$ex
+IF $ex>0 then		"backward compatibility"
+	destroy('nchunk','current')
+	destroy('nchunk','processed')
+ENDIF
+lb='n' gf=at/2 lsfid=0 
+fn=4*np ni=0 
+groupcopy('current','processed','acquisition')
+wft('nodc') aph full vsadj

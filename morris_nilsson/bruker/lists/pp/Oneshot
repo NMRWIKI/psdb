@@ -1,0 +1,140 @@
+;avance-version (16/06/10)
+;2D Doneshot DOSY pulse sequence
+;$CLASS=HighRes
+;$DIM=2D
+;$TYPE=
+;$SUBTYPE=
+;$COMMENT=
+;A one-shot sequence for high-resolution diffusion-ordered spectroscopy
+;Michelle D. Pelta, Gareth A. Morris, Marc J. Stchedroff, Stephen J. Hammond 
+;Magnetic Resonance in Chemistry. Volume 40 Issue 13, Pages S147 - S152
+;doi: 10.1002/mrc.1107
+
+
+#include <Avance.incl>
+#include <Grad.incl>
+#include <Delay.incl>
+
+
+define list<gradient> diff=<Difframp>
+
+
+"cnst17=2*p1+d16+p30"; Dtau
+
+"cnst18=p30*2*p30*2*(d20+(p30/3)*(cnst14*cnst14-2)+((2*p1+d16+p30)/2)*(cnst14*cnst14-1))" ; Dosytimecubed
+
+"cnst15=1+cnst14"  ; 1 + alpha
+"cnst16=1-cnst14"  ; 1 - alpha
+
+
+"p2=p1*2"
+
+"DELTA1=d20-4.0*p1-4.0*p30-5.0*d16-p19" 
+
+
+"acqt0=-p1*2/3.1416"
+
+
+1 ze
+2 d1*0.5 ph10  				;ph10+ph11= ph1
+  d1*0.5 ph11				;ph10+ph11= ph1
+
+
+ 50u UNBLKGRAD
+ 
+  p19:gp7*-1.0				;Spoiler gradient balancing pulse
+  d16
+ 
+  
+  p1 ph1				;1st 90
+  
+  p30:gp1*diff*cnst16 		 	; 1 - alpha
+  d16   
+  
+    
+  p2 ph2				;First 180
+  
+  p30:gp1*-1*diff*cnst15		;1 + alpha
+  d16
+  
+  p1 ph3				; 2nd 90
+  
+  p30:gp1*diff*2*cnst14			;Lock refocusing pulse pulse
+  d16
+  
+  p19:gp7				;Spoiler gradient balancing pulse
+  d16 ph12           			;ph12+ph13=ph4
+  
+  DELTA1
+  
+  p30:gp1*diff*2*cnst14 		;Lock refocusing pulse pulse
+  d16 ph13           			;ph12+ph13=ph4
+  
+  
+  p1 ph4	; 1st 90
+  
+  p30:gp1*diff*cnst16   		; 1 - alpha
+  d16*0.5 ph14        		   	; ph14+ph15=ph5
+  d16*0.5 ph15         			; ph14+ph15=ph5
+    
+  p2 ph5		
+  
+  p30:gp1*-1*diff*cnst15		; 1 + alpha
+  d16
+  
+  4u BLKGRAD
+  
+  go=2 ph31
+  d1*0.5 mc #0 to 2 F1QF(igrad diff)
+exit
+
+
+
+ph10={0}*4 {1}*4
+ph11=0 2
+
+ph12={0}*2 {2}*2
+ph13={0}*8 {1}*8 {2}*8 {3}*8
+
+ph14={0}*64 {1}*64
+ph15={0}*16 {2}*16
+
+ph1= ph10 + ph11               
+			
+ph2={0}*128 {2}*128 
+ph3={0}*32 {2}*32
+ph4= ph12 + ph13
+ph5= ph14 + ph15
+
+
+
+ph31=ph1 - ph2*2 + ph3 - ph4 + ph5*2
+
+
+;pl1 : f1 channel - power level for pulse (default)
+;p1  : f1 channel -  90 degree high power pulse
+;p19: gradient pulse 2 (spoil gradient)
+;p30: gradient pulse (little DELTA*0.5)
+;d1  : relaxation delay; 1-5 * T1
+;d16: delay for gradient recovery
+;d20: diffusion time (big DELTA)
+ 
+;NS: 1 * n
+;DS: 1 * m
+;td1: number of experiments
+;FnMODE: QF
+
+
+
+; cnst14 : alpha. Unbalancing factor. Use 0.2.
+
+; use,  gradient value  gpz1: 100  and  gpz7 : 100
+
+;use AU-program dosy to calculate gradient ramp-file Difframp
+;        use xf2 and DOSY processing
+;        use "setdiffparm STEbp" instead of "setdiffparm" 
+
+ 
+
+
+;$Id: Doneshot,v 1.x 2010/06/16 xx:xx:xx ber Exp $

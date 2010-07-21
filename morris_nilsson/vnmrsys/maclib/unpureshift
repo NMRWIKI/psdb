@@ -1,0 +1,3 @@
+"unpureshift: revert to original pureshift data following pureshiftZS_prc macro"
+
+rttmp('pureshift')

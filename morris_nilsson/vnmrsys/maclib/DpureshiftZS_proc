@@ -1,0 +1,117 @@
+"DpureshiftZS_proc :  assemble DOSY dataset from DpureshiftZS data"
+
+if ($#>0) then
+        write('error','Usage: DpureshiftZS_proc takes no arguments')
+        abort
+endif
+
+input('WARNING: experiment 5 will be deleted: type \'y\' to continue  '):$contflag
+IF ($contflag<>'y') THEN
+ abort
+ENDIF
+
+delexp(5)
+cexp(5)
+$expname=''
+jexp:$startexp,$expname
+
+$nfid=ni
+exists('nchunk','parameter'):$ex
+IF $ex>0 then           "backward compatibility"
+        sw1=sw*2/nchunk
+	groupcopy('current','processed','acquisition')
+ENDIF
+cptmp('pureshift')
+
+$npoint=trunc((sw/sw1)+0.5)
+$tmpfile=userdir+'/'+$expname+'/homodec_writefid'
+$tmpfile2=userdir+'/'+$expname+'/homodec_fid'
+beepoff
+
+echo('tmpfile : ',$tmpfile)
+echo('tmpfile2 : ',$tmpfile2)
+echo('$npoint = ',$npoint)
+
+$ngrad=size('gzlvl1')
+
+$imag=0.0
+$real=0.0
+
+$k=1
+REPEAT
+rttmp('pureshift')
+echo($k)
+	exists($tmpfile,'file'):$ex1				
+	IF $ex1>0 then 						
+    	shell('rm',$tmpfile)	
+	ENDIF			
+
+	$i=1
+	REPEAT
+		writefid($tmpfile,($k + ($i-1)*$ngrad))
+		lookup('file',$tmpfile)
+	       	lookup('read'):$temp   "read dummy points"
+       		lookup('read'):$temp   "read dummy points"
+
+		$j=1
+		IF $i<2 THEN
+			REPEAT
+				lookup('read'):$imag[($i-1)*$npoint+$j]
+				lookup('read'):$real[($i-1)*$npoint+$j]
+				$j=$j+1
+			UNTIL ($j>($npoint/2.0))
+		ELSE
+			REPEAT
+				lookup('read'):$imag[($i-1)*$npoint+$j-$npoint/2]
+				lookup('read'):$real[($i-1)*$npoint+$j-$npoint/2]
+				$j=$j+1
+			UNTIL ($j>($npoint))
+		ENDIF
+		exists($tmpfile,'file'):$ex1				
+		IF $ex1>0 then 						
+		    shell('rm',$tmpfile)	
+		ENDIF			
+		$i=$i+1
+	UNTIL ($i>$nfid)
+
+	exists($tmpfile2,'file'):$ex1				
+	IF $ex1>0 then 						
+	    shell('rm',$tmpfile2)	
+	ENDIF			
+
+	$i=1
+	REPEAT 
+		write('file',$tmpfile2,'%d %d',$imag[$i],$real[$i])
+		$i=$i+1
+	UNTIL ($i>($nfid*$npoint-$npoint/2))
+
+	rm(curexp+'/acqfil/fid')
+	setvalue('np',(2*$npoint*$nfid-$npoint))
+	setvalue('fn',np)
+	groupcopy('current','processed','acquisition')
+	makefid($tmpfile2)
+	echo($k)
+	IF $k=1 THEN
+		clradd
+	ENDIF
+	add('new')
+
+	exists($tmpfile2,'file'):$ex1				
+	IF $ex1>0 then 						
+	  shell('rm',$tmpfile2)	
+	ENDIF			
+echo('$k = ',$k)
+	$k=$k+1
+UNTIL ($k>$ngrad)
+mf(5,$startexp)
+d2=0
+calcdim
+setvalue('np',($npoint*$nfid-$npoint/2))
+at=np/sw
+exists('nchunk','parameter'):$ex
+IF $ex>0 then           "backward compatibility"
+        destroy('nchunk','current')
+ENDIF
+groupcopy('current','processed','acquisition')
+fn=32k  lb='n' gf=at/2 wft vp=10 vsadj aph
+ 
