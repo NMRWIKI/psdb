@@ -1,4 +1,3 @@
-# 1 "/opt/xwinnmr/exp/stan/nmr/lists/pp/n_con_2h_ct_2d_ul.kt"
 ;n_con_2h_ct_2d_ul.kt
 ;for uniform labeled sample
 ;cpd decoupling version
@@ -58,34 +57,20 @@ prosol relations=<triple_c>
 "spoff15=bf3*((cnst22-cnst21)/2000000)"
 
 
-# 1 "mc_line 60 file /opt/xwinnmr/exp/stan/nmr/lists/pp/n_con_2h_ct_2d_ul.kt expanding definition part of mc command before ze"
-define delay MCWRK
-define delay MCREST
-define loopcounter ST1CNT
-"ST1CNT = td1 / (2)"
-"MCWRK = 0.333333*d11"
-"MCREST = d11 - d11"
-# 60 "/opt/xwinnmr/exp/stan/nmr/lists/pp/n_con_2h_ct_2d_ul.kt"
 1 ze
-# 1 "mc_line 60 file /opt/xwinnmr/exp/stan/nmr/lists/pp/n_con_2h_ct_2d_ul.kt expanding definition of mc command after ze"
-# 61 "/opt/xwinnmr/exp/stan/nmr/lists/pp/n_con_2h_ct_2d_ul.kt"
 
 
 ;f1:N, f2:H, f3:C, f4:D
 
   d11 pl16:f3
-  d11 setnmr4|28
+  d11 LOCKDEC_ON
   d11 pl17:f4
-# 1 "mc_line 68 file /opt/xwinnmr/exp/stan/nmr/lists/pp/n_con_2h_ct_2d_ul.kt expanding start label for mc command"
-2 MCWRK  do:f2 do:f3 do:f4
-LBLSTS1, MCWRK  * 2
-LBLF1, MCREST
-# 69 "/opt/xwinnmr/exp/stan/nmr/lists/pp/n_con_2h_ct_2d_ul.kt"
-3 d11 setnmr4^24
-  9m setnmr3^0
+2 d11 do:f2 do:f3 do:f4
+3 d11 H2_LOCK
+  9m LOCKH_OFF
   d1 pl1:f1 pl12:f2 pl0:f3
-  50u setnmr3|0 setnmr0|34|32|33
-  d12 setnmr4|24
+  50u UNBLKGRAD
+  d12 H2_PULSE
   5u
   d12
   (p11:sp23 ph3):f3 ; CO90 Q5	;CO indirect_____________
@@ -113,22 +98,18 @@ LBLF1, MCREST
   d26
   d12 pl16:f3
 
-  4u setnmr0^34^32^33
+  4u BLKGRAMP
   go=2 ph31 cpd3:f3
 
-# 1 "mc_line 104 file /opt/xwinnmr/exp/stan/nmr/lists/pp/n_con_2h_ct_2d_ul.kt expanding mc command in line"
-  MCWRK  do:f2 do:f3 do:f4 wr #0 if #0 zd ip3
-  lo to LBLSTS1 times 2
-  MCWRK dd31  MCWRK  id30
-  lo to LBLF1 times ST1CNT
-# 106 "/opt/xwinnmr/exp/stan/nmr/lists/pp/n_con_2h_ct_2d_ul.kt"
+  d11 do:f2 do:f3 do:f4 mc #0 to 2
+     F1PH(ip3, dd31 & id30)
 
 
 
   d11 do:f2 do:f3 do:f4
-  d11 setnmr4^24
-  d11 setnmr3^0
-  d11 setnmr4^28
+  d11 H2_LOCK
+  d11 LOCKH_OFF
+  d11 LOCKDEC_OFF
 
 
 exit
